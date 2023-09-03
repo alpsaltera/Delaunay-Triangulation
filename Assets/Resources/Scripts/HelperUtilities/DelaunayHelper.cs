@@ -55,9 +55,12 @@ public static class DelaunayHelper
         }
         return new PointBounds(minX, minY, maxX, maxY);
     }
+	// ---------------------------------------------------------------------------------------------------
+	// 트라이 앵글 만들기
+	// ---------------------------------------------------------------------------------------------------
 
-    /// <summary> Triangulates a set of points utilising the Bowyer Watson Delaunay technique </summary>
-    public static List<Triangle> Delaun(List<Point> points)
+	/// <summary> Triangulates a set of points utilising the Bowyer Watson Delaunay technique </summary>
+	public static List<Triangle> Delaun(List<Point> points)
     {
         ///TODO - Plenty of optimizations for this algorithm to be implemented
         points = new List<Point>(points);
@@ -77,6 +80,8 @@ public static class DelaunayHelper
             List<Triangle> badTriangles = new List<Triangle>();
 
             //Identify 'bad triangles'
+			// LSH : 한점에 대해서 현재 가지고 있는 모든 삼각형에 대해서 체크한다.
+			// LSH : 이렇게 되었을 때, 복잡한 구조라고 할지라도 이루프를 계속 돌면 마지막에 정리가 된다.
             for (int triIndex = triangles.Count - 1; triIndex >= 0; triIndex--)
             {
                 Triangle triangle = triangles[triIndex];
@@ -88,8 +93,10 @@ public static class DelaunayHelper
                 }
             }
 
-            //Contruct a polygon from unique edges, i.e. ignoring duplicate edges inclusively
-            List<Edge> polygon = new List<Edge>();
+
+			Debug.Log( $"BadTriCtn = {badTriangles.Count}" );
+			//Contruct a polygon from unique edges, i.e. ignoring duplicate edges inclusively
+			List<Edge> polygon = new List<Edge>();
             for (int i = 0; i < badTriangles.Count; i++)
             {
                 Triangle triangle = badTriangles[i];
@@ -100,6 +107,7 @@ public static class DelaunayHelper
                     bool rejectEdge = false;
                     for (int t = 0; t < badTriangles.Count; t++)
                     {
+						// LSH : 나 자신을 제외한, 다른 삼각형과 공유하고 있는 엣지만 뺀다. ( 공유한 엣지 제거 )
                         if (t != i && badTriangles[t].ContainsEdge(edges[j])){
                             rejectEdge = true;
                         }
@@ -111,6 +119,8 @@ public static class DelaunayHelper
                 }
             }
 
+			// LSH : 그런데 이게 정말 딱 1번에 이렇게 되는가?
+			// LSH : 모든 삼각형에 대해서 다 돌린다.
             //Remove bad triangles from the triangulation
             for (int i = badTriangles.Count - 1; i >= 0; i--){
                 triangles.Remove(badTriangles[i]);
@@ -152,7 +162,9 @@ public static class DelaunayHelper
             }
         }
 
-        return triangles;
+		Debug.Log( $"Finally" );
+
+		return triangles;
     }
 
     public static Mesh CreateMeshFromTriangulation(List<Triangle> triangulation)
