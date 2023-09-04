@@ -99,35 +99,46 @@ public static class DelaunayHelper
 			List<Edge> polygon = new List<Edge>();
             for (int i = 0; i < badTriangles.Count; i++)
             {
-                Triangle triangle = badTriangles[i];
-                Edge[] edges = triangle.GetEdges();
+				// LSH 
+                //Triangle triangle = badTriangles[i];
+                //Edge[] badTriangleEdges = triangle.GetEdges();
+                Edge[] badTriangleEdges = badTriangles[i].GetEdges();
 
-                for (int j = 0; j < edges.Length; j++)
+				// 나를 제외한 배드 삼각형에 있는 엣지만 뺀다.
+                for (int j = 0; j < badTriangleEdges.Length; j++)
                 {
                     bool rejectEdge = false;
                     for (int t = 0; t < badTriangles.Count; t++)
                     {
 						// LSH : 나 자신을 제외한, 다른 삼각형과 공유하고 있는 엣지만 뺀다. ( 공유한 엣지 제거 )
-                        if (t != i && badTriangles[t].ContainsEdge(edges[j])){
-                            rejectEdge = true;
+						// LSH : 이게 진짜 오묘하다.
+						// 배드 삼각형이 자기 자신의 엣지를 에외하고, 다른 삼각형과 공유한 엣지에서만 그 엣지라인을 제거하는 로직이다.
+
+						// 이게 이 코딩의 핵심라인이다.
+						// 배드 삼각형의 엣지라인이 ===> 다른 배드 삼각형과 공유된 부분만 제거해 낸다.
+						if ( t != i && badTriangles[ t ].ContainsEdge( badTriangleEdges[ j ] ) )
+						{
+							rejectEdge = true;
                         }
                     }
 
-                    if (!rejectEdge){
-                        polygon.Add(edges[j]);
-                    }
-                }
-            }
+					if ( !rejectEdge )
+					{
+						polygon.Add( badTriangleEdges[ j ] );
+					}
+				}
+			}
 
 			// LSH : 그런데 이게 정말 딱 1번에 이렇게 되는가?
 			// LSH : 모든 삼각형에 대해서 다 돌린다.
-            //Remove bad triangles from the triangulation
-            for (int i = badTriangles.Count - 1; i >= 0; i--){
-                triangles.Remove(badTriangles[i]);
-            }
+			//Remove bad triangles from the triangulation
+			for ( int i = badTriangles.Count - 1; i >= 0; i-- )
+			{
+				triangles.Remove( badTriangles[ i ] );
+			}
 
-            //Create new triangles
-            for (int i = 0; i < polygon.Count; i++)
+			//Create new triangles
+			for ( int i = 0; i < polygon.Count; i++)
             {
                 Edge edge = polygon[i];
                 Point pointA = new Point(p.x, p.y);
