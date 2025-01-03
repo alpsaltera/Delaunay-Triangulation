@@ -5,10 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class Point
 {
-    [SerializeField]
-    private float X;
-    [SerializeField]
-    private float Y;
+    [SerializeField] private float X;
+    [SerializeField] private float Y;
 
     public float x { get { return X; } }
     public float y { get { return Y; } }
@@ -32,7 +30,8 @@ public class Point
         Y = pos.y;
     }
 
-    public bool EqualsPoint(Point point){
-        return X == point.X && Y == point.Y;
-    }
+	public bool EqualsPoint( Point point )
+	{
+		return X == point.X && Y == point.Y;
+	}
 }
